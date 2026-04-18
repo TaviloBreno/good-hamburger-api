@@ -1,19 +1,19 @@
 ﻿@inherits LayoutComponentBase
 
-<PageTitle>GoodHamburger.Blazor</PageTitle>
-
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="/">🍔 Good Hamburger</a>
+                </div>
+            </nav>
+        </div>
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
+    <div class="row">
+        <div class="col-12">
             @Body
-        </article>
-    </main>
+        </div>
+    </div>
 </div>
