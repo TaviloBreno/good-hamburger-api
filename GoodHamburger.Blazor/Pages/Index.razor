@@ -2,169 +2,192 @@
 @using GoodHamburger.Core.DTOs
 @using GoodHamburger.Core.Entities
 @inject HttpClient Http
+@inject IJSRuntime JS
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="/">🍔 Good Hamburger</a>
-                </div>
-            </nav>
-        </div>
-    </div>
-    
-    <div class="row">
-        <div class="col-12">
-            <div class="container mt-4">
-                <div class="row">
-                    <div class="col-12 text-center mb-4">
-                        <h1 class="display-4">🍔 Good Hamburger</h1>
-                        <p class="lead">Sistema de Pedidos - Peça seu lanche com desconto!</p>
-                        <hr />
-                    </div>
-                </div>
+<div class="gh-page">
+    <section class="gh-hero">
+        <div class="gh-hero__content">
+            <p class="gh-eyebrow">Painel de Operacao</p>
+            <h1>Good Hamburger</h1>
+            <p class="gh-subtitle">Registre pedidos em segundos e acompanhe faturamento em tempo real.</p>
 
-                <div class="row">
-                    <div class="col-md-5 mb-4">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-primary text-white">
-                                <h5 class="mb-0">🆕 Novo Pedido</h5>
-                            </div>
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">🍔 Sanduíche *</label>
-                                    <select @bind="selectedSandwich" class="form-control">
-                                        <option value="">Selecione...</option>
-                                        @foreach (var sandwich in sandwiches)
-                                        {
-                                            <option value="@sandwich.Key">@sandwich.Value</option>
-                                        }
-                                    </select>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">🍟 Acompanhamento</label>
-                                    <select @bind="selectedSide" class="form-control">
-                                        <option value="">Nenhum</option>
-                                        @foreach (var side in sideDishes)
-                                        {
-                                            <option value="@side.Key">@side.Value</option>
-                                        }
-                                    </select>
-                                </div>
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-bold">🥤 Bebida</label>
-                                    <select @bind="selectedDrink" class="form-control">
-                                        <option value="">Nenhuma</option>
-                                        @foreach (var drink in drinks)
-                                        {
-                                            <option value="@drink.Key">@drink.Value</option>
-                                        }
-                                    </select>
-                                </div>
-
-                                @if (!string.IsNullOrEmpty(selectedSandwich))
-                                {
-                                    <div class="alert alert-info">
-                                        <strong>📊 Prévia do Pedido:</strong><br />
-                                        Subtotal: <strong>@GetSubtotal().ToString("C")</strong><br />
-                                        Desconto: <strong class="text-success">-@GetDiscount().ToString("C")</strong><br />
-                                        <strong class="text-danger">Total: @GetTotal().ToString("C")</strong>
-                                    </div>
-                                }
-
-                                <button class="btn btn-primary w-100" @onclick="CreateOrder" disabled="@isLoading">
-                                    @if (isLoading)
-                                    {
-                                        <span class="spinner-border spinner-border-sm me-2"></span>
-                                        <span>Processando...</span>
-                                    }
-                                    else
-                                    {
-                                        <span>Criar Pedido</span>
-                                    }
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-7">
-                        <div class="card shadow-sm">
-                            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">📋 Pedidos Realizados</h5>
-                                <button class="btn btn-light btn-sm" @onclick="LoadOrders">🔄 Atualizar</button>
-                            </div>
-                            <div class="card-body">
-                                @if (isLoadingOrders)
-                                {
-                                    <div class="text-center py-5">
-                                        <div class="spinner-border text-primary" role="status">
-                                            <span class="visually-hidden">Carregando...</span>
-                                        </div>
-                                    </div>
-                                }
-                                else if (orders == null || !orders.Any())
-                                {
-                                    <div class="alert alert-info text-center">
-                                        Nenhum pedido encontrado. Crie seu primeiro pedido!
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="table-responsive">
-                                        <table class="table table-hover">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th>ID</th>
-                                                    <th>Data</th>
-                                                    <th>Sanduíche</th>
-                                                    <th>Acompanhamento</th>
-                                                    <th>Bebida</th>
-                                                    <th>Subtotal</th>
-                                                    <th>Desconto</th>
-                                                    <th>Total</th>
-                                                    <th>Ações</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var order in orders)
-                                                {
-                                                    <tr>
-                                                        <td><code>@order.Id.ToString().Substring(0,8)...</code></td>
-                                                        <td>@order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
-                                                        <td>@GetSandwichName(order.Sandwich)</td>
-                                                        <td>@(order.SideDish?.ToString() ?? "-")</td>
-                                                        <td>@(order.Drink?.ToString() ?? "-")</td>
-                                                        <td>@order.Subtotal.ToString("C")</td>
-                                                        <td class="text-success">-@order.Discount.ToString("C")</td>
-                                                        <td class="fw-bold">@order.Total.ToString("C")</td>
-                                                        <td>
-                                                            <button class="btn btn-sm btn-warning me-1" @onclick="() => EditOrder(order)">
-                                                                ✏️
-                                                            </button>
-                                                            <button class="btn btn-sm btn-danger" @onclick="() => DeleteOrder(order.Id)">
-                                                                🗑️
-                                                            </button>
-                                                        </td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="gh-kpis">
+                <article class="gh-kpi-card">
+                    <span>Pedidos</span>
+                    <strong>@GetOrdersCount()</strong>
+                </article>
+                <article class="gh-kpi-card">
+                    <span>Faturamento</span>
+                    <strong>@GetRevenue().ToString("C")</strong>
+                </article>
+                <article class="gh-kpi-card">
+                    <span>Ticket medio</span>
+                    <strong>@GetAverageTicket().ToString("C")</strong>
+                </article>
             </div>
         </div>
-    </div>
+    </section>
+
+    @if (!string.IsNullOrWhiteSpace(feedbackMessage))
+    {
+        <div class="gh-feedback gh-feedback--@feedbackType">
+            <span>@feedbackMessage</span>
+            <button class="gh-feedback__close" @onclick="ClearMessage" aria-label="Fechar">x</button>
+        </div>
+    }
+
+    <section class="gh-grid">
+        <article class="gh-card gh-card--composer" id="composer">
+            <div class="gh-card__header">
+                <h2>@(isEditing ? "Editar Pedido" : "Novo Pedido")</h2>
+                <p>Monte o combo e confira os descontos automaticamente.</p>
+            </div>
+
+            <div class="gh-form-group">
+                <label for="sandwich">Sanduiche <span>*</span></label>
+                <select id="sandwich" @bind="selectedSandwich" class="gh-select">
+                    <option value="">Selecione...</option>
+                    @foreach (var sandwich in sandwiches)
+                    {
+                        <option value="@sandwich.Key">@sandwich.Value</option>
+                    }
+                </select>
+            </div>
+
+            <div class="gh-form-group">
+                <label for="side">Acompanhamento</label>
+                <select id="side" @bind="selectedSide" class="gh-select">
+                    <option value="">Nenhum</option>
+                    @foreach (var side in sideDishes)
+                    {
+                        <option value="@side.Key">@side.Value</option>
+                    }
+                </select>
+            </div>
+
+            <div class="gh-form-group">
+                <label for="drink">Bebida</label>
+                <select id="drink" @bind="selectedDrink" class="gh-select">
+                    <option value="">Nenhuma</option>
+                    @foreach (var drink in drinks)
+                    {
+                        <option value="@drink.Key">@drink.Value</option>
+                    }
+                </select>
+            </div>
+
+            <div class="gh-preview">
+                <h3>Resumo financeiro</h3>
+                <div class="gh-preview__row">
+                    <span>Subtotal</span>
+                    <strong>@GetSubtotal().ToString("C")</strong>
+                </div>
+                <div class="gh-preview__row">
+                    <span>Desconto</span>
+                    <strong class="gh-money--discount">-@GetDiscount().ToString("C")</strong>
+                </div>
+                <div class="gh-preview__row gh-preview__row--total">
+                    <span>Total</span>
+                    <strong>@GetTotal().ToString("C")</strong>
+                </div>
+            </div>
+
+            <div class="gh-actions">
+                <button class="gh-btn gh-btn--primary" @onclick="CreateOrder" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span>Salvando...</span>
+                    }
+                    else if (isEditing)
+                    {
+                        <span>Atualizar pedido</span>
+                    }
+                    else
+                    {
+                        <span>Criar pedido</span>
+                    }
+                </button>
+
+                @if (isEditing)
+                {
+                    <button class="gh-btn gh-btn--ghost" @onclick="ResetForm" disabled="@isLoading">Cancelar edicao</button>
+                }
+            </div>
+        </article>
+
+        <article class="gh-card gh-card--orders">
+            <div class="gh-card__header gh-card__header--inline">
+                <div>
+                    <h2>Pedidos recentes</h2>
+                    <p>Visao consolidada de vendas e descontos aplicados.</p>
+                </div>
+                <button class="gh-btn gh-btn--ghost" @onclick="LoadOrders" disabled="@isLoadingOrders">Atualizar</button>
+            </div>
+
+            @if (isLoadingOrders)
+            {
+                <div class="gh-loading">
+                    <div class="spinner-border" role="status"></div>
+                    <span>Carregando pedidos...</span>
+                </div>
+            }
+            else if (orders == null || !orders.Any())
+            {
+                <div class="gh-empty">
+                    <h3>Nenhum pedido ainda</h3>
+                    <p>Crie o primeiro pedido para iniciar o painel.</p>
+                </div>
+            }
+            else
+            {
+                <div class="gh-table-wrap">
+                    <table class="gh-table">
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Data</th>
+                                <th>Itens</th>
+                                <th>Subtotal</th>
+                                <th>Desconto</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var order in orders)
+                            {
+                                <tr>
+                                    <td>
+                                        <code>@order.Id.ToString()[..8]</code>
+                                    </td>
+                                    <td>@order.CreatedAt.ToLocalTime().ToString("dd/MM HH:mm")</td>
+                                    <td>
+                                        <div class="gh-item-stack">
+                                            <span>@GetSandwichName(order.Sandwich)</span>
+                                            <small>@(GetSideName(order.SideDish)) | @(GetDrinkName(order.Drink))</small>
+                                        </div>
+                                    </td>
+                                    <td>@order.Subtotal.ToString("C")</td>
+                                    <td>
+                                        <span class="gh-discount-chip">-@order.Discount.ToString("C")</span>
+                                    </td>
+                                    <td class="gh-total-cell">@order.Total.ToString("C")</td>
+                                    <td class="gh-row-actions">
+                                        <button class="gh-icon-btn" title="Editar" @onclick="() => EditOrder(order)">Editar</button>
+                                        <button class="gh-icon-btn gh-icon-btn--danger" title="Excluir" @onclick="() => DeleteOrder(order.Id)">Excluir</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </article>
+    </section>
 </div>
 
 @code {
-    // Dados do cardápio
     private Dictionary<string, string> sandwiches = new()
     {
         { "XBurger", "X Burger - R$ 5,00" },
@@ -182,17 +205,28 @@
         { "Soda", "Refrigerante - R$ 2,50" }
     };
 
-    // Variáveis do formulário
     private string? selectedSandwich;
     private string? selectedSide;
     private string? selectedDrink;
     private bool isLoading = false;
     private bool isLoadingOrders = true;
     private List<OrderResponse>? orders;
-    
-    // Modo de edição
     private bool isEditing = false;
     private Guid editingOrderId;
+    private string? feedbackMessage;
+    private string feedbackType = "info";
+
+    private int GetOrdersCount() => orders?.Count ?? 0;
+
+    private decimal GetRevenue() => orders?.Sum(order => order.Total) ?? 0m;
+
+    private decimal GetAverageTicket()
+    {
+        if (orders == null || orders.Count == 0)
+            return 0m;
+
+        return orders.Average(order => order.Total);
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -206,9 +240,9 @@
         {
             orders = await Http.GetFromJsonAsync<List<OrderResponse>>("api/orders");
         }
-        catch (Exception ex)
+        catch
         {
-            Console.WriteLine($"Erro ao carregar pedidos: {ex.Message}");
+            await ShowMessage("Nao foi possivel carregar pedidos no momento.", "error");
             orders = new List<OrderResponse>();
         }
         finally
@@ -225,16 +259,15 @@
         selectedSandwich = order.Sandwich.ToString();
         selectedSide = order.SideDish?.ToString();
         selectedDrink = order.Drink?.ToString();
-        
-        // Scroll para o formulário
-        StateHasChanged();
+
+        _ = JS.InvokeVoidAsync("gh.scrollToComposer");
     }
 
     private async Task CreateOrder()
     {
         if (string.IsNullOrEmpty(selectedSandwich))
         {
-            await ShowMessage("Selecione um sanduíche!", "error");
+            await ShowMessage("Selecione um sanduiche para continuar.", "error");
             return;
         }
 
@@ -247,37 +280,48 @@
 
             if (isEditing)
             {
-                // Atualizar pedido existente
-                var updateRequest = new UpdateOrderRequest(sandwich, side, drink);
+                var updateRequest = new UpdateOrderRequest(
+                    sandwich,
+                    side,
+                    drink,
+                    SandwichQuantity: 1,
+                    SideDishQuantity: side is null ? null : 1,
+                    DrinkQuantity: drink is null ? null : 1);
+
                 var response = await Http.PutAsJsonAsync($"api/orders/{editingOrderId}", updateRequest);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
-                    await ShowMessage("Pedido atualizado com sucesso!", "success");
+                    await ShowMessage("Pedido atualizado com sucesso.", "success");
                     ResetForm();
                     await LoadOrders();
                 }
                 else
                 {
-                    await ShowMessage("Erro ao atualizar pedido", "error");
+                    await ShowMessage(await ParseApiError(response), "error");
                 }
             }
             else
             {
-                // Criar novo pedido
-                var createRequest = new CreateOrderRequest(sandwich, side, drink);
+                var createRequest = new CreateOrderRequest(
+                    sandwich,
+                    side,
+                    drink,
+                    SandwichQuantity: 1,
+                    SideDishQuantity: side is null ? null : 1,
+                    DrinkQuantity: drink is null ? null : 1);
+
                 var response = await Http.PostAsJsonAsync("api/orders", createRequest);
-                
+
                 if (response.IsSuccessStatusCode)
                 {
-                    await ShowMessage("Pedido criado com sucesso!", "success");
+                    await ShowMessage("Pedido criado com sucesso.", "success");
                     ResetForm();
                     await LoadOrders();
                 }
                 else
                 {
-                    var error = await response.Content.ReadAsStringAsync();
-                    await ShowMessage($"Erro: {error}", "error");
+                    await ShowMessage(await ParseApiError(response), "error");
                 }
             }
         }
@@ -293,24 +337,22 @@
 
     private async Task DeleteOrder(Guid id)
     {
-        if (await ShowConfirm("Tem certeza que deseja excluir este pedido?"))
+        if (await ShowConfirm("Deseja realmente excluir este pedido?"))
         {
             try
             {
                 var response = await Http.DeleteAsync($"api/orders/{id}");
                 if (response.IsSuccessStatusCode)
                 {
-                    await ShowMessage("Pedido removido com sucesso!", "success");
+                    await ShowMessage("Pedido removido com sucesso.", "success");
                     await LoadOrders();
-                    
+
                     if (isEditing && editingOrderId == id)
-                    {
                         ResetForm();
-                    }
                 }
                 else
                 {
-                    await ShowMessage("Erro ao remover pedido", "error");
+                    await ShowMessage(await ParseApiError(response), "error");
                 }
             }
             catch (Exception ex)
@@ -330,6 +372,11 @@
         StateHasChanged();
     }
 
+    private void ClearMessage()
+    {
+        feedbackMessage = null;
+    }
+
     private decimal GetSandwichPrice(string sandwich)
     {
         return sandwich switch
@@ -344,9 +391,11 @@
     private decimal GetSubtotal()
     {
         decimal total = 0;
-        total += GetSandwichPrice(selectedSandwich ?? "");
-        if (selectedSide == "Fries") total += 2.00m;
-        if (selectedDrink == "Soda") total += 2.50m;
+        total += GetSandwichPrice(selectedSandwich ?? string.Empty);
+        if (selectedSide == "Fries")
+            total += 2.00m;
+        if (selectedDrink == "Soda")
+            total += 2.50m;
         return total;
     }
 
@@ -355,10 +404,14 @@
         bool hasSide = selectedSide == "Fries";
         bool hasDrink = selectedDrink == "Soda";
         decimal subtotal = GetSubtotal();
-        
-        if (hasSide && hasDrink) return subtotal * 0.20m;
-        if (hasDrink) return subtotal * 0.15m;
-        if (hasSide) return subtotal * 0.10m;
+
+        if (hasSide && hasDrink)
+            return subtotal * 0.20m;
+        if (hasDrink)
+            return subtotal * 0.15m;
+        if (hasSide)
+            return subtotal * 0.10m;
+
         return 0;
     }
 
@@ -372,15 +425,70 @@
         _ => type.ToString()
     };
 
+    private string GetSideName(SideDishType? type)
+    {
+        if (!type.HasValue)
+            return "Sem acompanhamento";
+
+        return type.Value switch
+        {
+            SideDishType.Fries => "Batata frita",
+            _ => type.Value.ToString()
+        };
+    }
+
+    private string GetDrinkName(DrinkType? type)
+    {
+        if (!type.HasValue)
+            return "Sem bebida";
+
+        return type.Value switch
+        {
+            DrinkType.Soda => "Refrigerante",
+            _ => type.Value.ToString()
+        };
+    }
+
     private async Task ShowMessage(string message, string type)
     {
-        // Implementar toast ou alert simples
-        await Task.Delay(10);
-        Console.WriteLine($"[{type.ToUpper()}] {message}");
+        feedbackMessage = message;
+        feedbackType = type;
+        StateHasChanged();
+
+        await Task.Delay(4500);
+
+        if (feedbackMessage == message)
+            feedbackMessage = null;
     }
 
     private async Task<bool> ShowConfirm(string message)
     {
-        return await Task.FromResult(true);
+        return await JS.InvokeAsync<bool>("gh.confirmAction", message);
+    }
+
+    private static async Task<string> ParseApiError(HttpResponseMessage response)
+    {
+        var content = await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrWhiteSpace(content))
+            return $"Erro na requisicao ({(int)response.StatusCode}).";
+
+        try
+        {
+            using var doc = JsonDocument.Parse(content);
+            var root = doc.RootElement;
+
+            if (root.TryGetProperty("error", out var errorElement))
+                return errorElement.GetString() ?? "Erro inesperado na API.";
+
+            if (root.TryGetProperty("message", out var messageElement))
+                return messageElement.GetString() ?? "Erro inesperado na API.";
+        }
+        catch
+        {
+            return content;
+        }
+
+        return content;
     }
 }
