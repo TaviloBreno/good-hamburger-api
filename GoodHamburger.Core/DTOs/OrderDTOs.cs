@@ -5,13 +5,19 @@ namespace GoodHamburger.Core.DTOs;
 public record CreateOrderRequest(
     SandwichType Sandwich,
     SideDishType? SideDish,
-    DrinkType? Drink
+    DrinkType? Drink,
+    int? SandwichQuantity = null,
+    int? SideDishQuantity = null,
+    int? DrinkQuantity = null
 );
 
 public record UpdateOrderRequest(
     SandwichType Sandwich,
     SideDishType? SideDish,
-    DrinkType? Drink
+    DrinkType? Drink,
+    int? SandwichQuantity = null,
+    int? SideDishQuantity = null,
+    int? DrinkQuantity = null
 );
 
 public record OrderResponse(

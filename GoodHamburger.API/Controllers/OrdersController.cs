@@ -46,7 +46,13 @@ namespace GoodHamburger.API.Controllers
         {
             try
             {
-                var order = new Order(request.Sandwich, request.SideDish, request.Drink);
+                var order = new Order(
+                    request.Sandwich,
+                    request.SideDish,
+                    request.Drink,
+                    request.SandwichQuantity,
+                    request.SideDishQuantity,
+                    request.DrinkQuantity);
                 await _orderRepository.AddAsync(order);
 
                 _logger.LogInformation("Order {OrderId} created successfully", order.Id);
@@ -71,7 +77,13 @@ namespace GoodHamburger.API.Controllers
 
             try
             {
-                order.Update(request.Sandwich, request.SideDish, request.Drink);
+                order.Update(
+                    request.Sandwich,
+                    request.SideDish,
+                    request.Drink,
+                    request.SandwichQuantity,
+                    request.SideDishQuantity,
+                    request.DrinkQuantity);
                 await _orderRepository.UpdateAsync(order);
 
                 _logger.LogInformation("Order {OrderId} updated successfully", order.Id);

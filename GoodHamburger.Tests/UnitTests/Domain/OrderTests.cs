@@ -128,12 +128,15 @@ public class OrderTests
     [Fact]
     public void CreateOrder_WithDuplicateItems_ShouldThrowException()
     {
-        var exception = Record.Exception(() =>
-        {
-            var order = new Order(SandwichType.XBurger);
-        });
+        var exception = Assert.Throws<ArgumentException>(() =>
+            new Order(
+                SandwichType.XBurger,
+                SideDishType.Fries,
+                null,
+                sideDishQuantity: 2));
 
-        Assert.Null(exception);
+        Assert.Contains("Itens duplicados nao sao permitidos", exception.Message);
+        Assert.Contains("acompanhamento", exception.Message);
     }
 
     [Fact]
@@ -148,9 +151,28 @@ public class OrderTests
     [Fact]
     public void Order_ShouldOnlyAllowOneItemPerCategory()
     {
-        var order = new Order(SandwichType.XBurger);
+        var exception = Assert.Throws<ArgumentException>(() =>
+            new Order(
+                SandwichType.XBacon,
+                null,
+                DrinkType.Soda,
+                drinkQuantity: 2));
 
-        Assert.NotNull(order.Sandwich);
+        Assert.Contains("Itens duplicados nao sao permitidos", exception.Message);
+        Assert.Contains("bebida", exception.Message);
+    }
+
+    [Fact]
+    public void CreateOrder_WithQuantityWithoutSelectedItem_ShouldThrowException()
+    {
+        var exception = Assert.Throws<ArgumentException>(() =>
+            new Order(
+                SandwichType.XEgg,
+                null,
+                null,
+                sideDishQuantity: 1));
+
+        Assert.Contains("sem selecionar acompanhamento", exception.Message);
     }
 
     [Theory]

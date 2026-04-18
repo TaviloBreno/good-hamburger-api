@@ -15,36 +15,90 @@ public class Order
 
     private Order() { } // For EF Core
 
-    public Order(SandwichType sandwich, SideDishType? sideDish = null, DrinkType? drink = null)
+    public Order(
+        SandwichType sandwich,
+        SideDishType? sideDish = null,
+        DrinkType? drink = null,
+        int? sandwichQuantity = null,
+        int? sideDishQuantity = null,
+        int? drinkQuantity = null)
     {
         Id = Guid.NewGuid();
         CreatedAt = DateTime.UtcNow;
-        
-        SetItems(sandwich, sideDish, drink);
+
+        SetItems(sandwich, sideDish, drink, sandwichQuantity, sideDishQuantity, drinkQuantity);
         CalculatePrices();
     }
 
-    public void Update(SandwichType sandwich, SideDishType? sideDish, DrinkType? drink)
+    public void Update(
+        SandwichType sandwich,
+        SideDishType? sideDish,
+        DrinkType? drink,
+        int? sandwichQuantity = null,
+        int? sideDishQuantity = null,
+        int? drinkQuantity = null)
     {
-        SetItems(sandwich, sideDish, drink);
+        SetItems(sandwich, sideDish, drink, sandwichQuantity, sideDishQuantity, drinkQuantity);
         UpdatedAt = DateTime.UtcNow;
         CalculatePrices();
     }
 
-    private void SetItems(SandwichType sandwich, SideDishType? sideDish, DrinkType? drink)
+    private void SetItems(
+        SandwichType sandwich,
+        SideDishType? sideDish,
+        DrinkType? drink,
+        int? sandwichQuantity,
+        int? sideDishQuantity,
+        int? drinkQuantity)
     {
-        ValidateDuplicateItems(sideDish, drink);
-        
+        ValidateDuplicateItems(sandwich, sideDish, drink, sandwichQuantity, sideDishQuantity, drinkQuantity);
+
         Sandwich = sandwich;
         SideDish = sideDish;
         Drink = drink;
     }
 
-    private void ValidateDuplicateItems(SideDishType? sideDish, DrinkType? drink)
+    private static void ValidateDuplicateItems(
+        SandwichType sandwich,
+        SideDishType? sideDish,
+        DrinkType? drink,
+        int? sandwichQuantity,
+        int? sideDishQuantity,
+        int? drinkQuantity)
     {
-        // No duplicate validation needed as each item can only appear onc
-        // This method is a placeholder for future validations
-        
+        var effectiveSandwichQuantity = sandwichQuantity ?? 1;
+        var effectiveSideDishQuantity = sideDishQuantity ?? (sideDish.HasValue ? 1 : 0);
+        var effectiveDrinkQuantity = drinkQuantity ?? (drink.HasValue ? 1 : 0);
+
+        if (effectiveSandwichQuantity <= 0)
+            throw new ArgumentException("Pedido invalido: o sanduiche deve ter quantidade 1.");
+
+        if (effectiveSandwichQuantity > 1)
+            throw new ArgumentException($"Itens duplicados nao sao permitidos: sanduiche '{sandwich}' informado {effectiveSandwichQuantity} vezes. Informe apenas 1 unidade.");
+
+        if (effectiveSideDishQuantity < 0)
+            throw new ArgumentException("Pedido invalido: quantidade de acompanhamento nao pode ser negativa.");
+
+        if (!sideDish.HasValue && effectiveSideDishQuantity > 0)
+            throw new ArgumentException("Pedido invalido: quantidade de acompanhamento informada sem selecionar acompanhamento.");
+
+        if (sideDish.HasValue && effectiveSideDishQuantity == 0)
+            throw new ArgumentException("Pedido invalido: acompanhamento selecionado deve ter quantidade 1.");
+
+        if (effectiveSideDishQuantity > 1)
+            throw new ArgumentException($"Itens duplicados nao sao permitidos: acompanhamento '{sideDish}' informado {effectiveSideDishQuantity} vezes. Informe apenas 1 unidade.");
+
+        if (effectiveDrinkQuantity < 0)
+            throw new ArgumentException("Pedido invalido: quantidade de bebida nao pode ser negativa.");
+
+        if (!drink.HasValue && effectiveDrinkQuantity > 0)
+            throw new ArgumentException("Pedido invalido: quantidade de bebida informada sem selecionar bebida.");
+
+        if (drink.HasValue && effectiveDrinkQuantity == 0)
+            throw new ArgumentException("Pedido invalido: bebida selecionada deve ter quantidade 1.");
+
+        if (effectiveDrinkQuantity > 1)
+            throw new ArgumentException($"Itens duplicados nao sao permitidos: bebida '{drink}' informada {effectiveDrinkQuantity} vezes. Informe apenas 1 unidade.");
     }
 
     private void CalculatePrices()

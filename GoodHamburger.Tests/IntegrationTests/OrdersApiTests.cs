@@ -27,6 +27,24 @@ public class OrdersApiTests : IClassFixture<WebApplicationFactory<Program>>
     }
 
     [Fact]
+    public async Task CreateOrder_WithDuplicateSideDish_ShouldReturnBadRequestWithClearMessage()
+    {
+        var request = new CreateOrderRequest(
+            SandwichType.XBurger,
+            SideDishType.Fries,
+            null,
+            SideDishQuantity: 2);
+
+        var response = await _client.PostAsJsonAsync("/api/orders", request);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+        var content = await response.Content.ReadAsStringAsync();
+        Assert.Contains("Itens duplicados nao sao permitidos", content);
+        Assert.Contains("acompanhamento", content);
+    }
+
+    [Fact]
     public async Task GetAllOrders_ShouldReturnOk()
     {
         var response = await _client.GetAsync("/api/orders");
