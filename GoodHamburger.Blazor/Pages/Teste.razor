@@ -1,0 +1,40 @@
+﻿@page "/teste"
+@inject HttpClient Http
+
+<h3>Teste de Conexão com a API</h3>
+
+<button class="btn btn-primary" @onclick="TestarConexao">Testar Conexão</button>
+
+@if (!string.IsNullOrEmpty(resultado))
+{
+    <div class="alert alert-info mt-3">
+        <strong>Resultado:</strong> @resultado
+    </div>
+}
+
+@code {
+    private string? resultado;
+
+    private async Task TestarConexao()
+    {
+        try
+        {
+            resultado = "Testando conexão...";
+            var response = await Http.GetAsync("api/menu");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                resultado = $"✅ Conexão OK! API respondeu: {content}";
+            }
+            else
+            {
+                resultado = $"❌ Erro: {response.StatusCode}";
+            }
+        }
+        catch (Exception ex)
+        {
+            resultado = $"❌ Erro de conexão: {ex.Message}";
+        }
+    }
+}
