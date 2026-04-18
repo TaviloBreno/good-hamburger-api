@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "D3yq0jZ6ljI=",
+  "success": true,
+  "projectFilePath": "C:\\programacao\\trabalho\\GoodHamburger\\GoodHamburger.Infrastructure\\GoodHamburger.Infrastructure.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Tavilo Breno\\.nuget\\packages\\fluentvalidation\\12.1.1\\fluentvalidation.12.1.1.nupkg.sha512",
+    "C:\\Users\\Tavilo Breno\\.nuget\\packages\\microsoft.extensions.dependencyinjection\\10.0.6\\microsoft.extensions.dependencyinjection.10.0.6.nupkg.sha512",
+    "C:\\Users\\Tavilo Breno\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\10.0.6\\microsoft.extensions.dependencyinjection.abstractions.10.0.6.nupkg.sha512"
+  ],
+  "logs": []
+}
