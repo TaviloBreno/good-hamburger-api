@@ -17,8 +17,7 @@ public class AppDbContext : DbContext
         ConfigureOrderEntity(modelBuilder);
         ConfigureMenuItemEntity(modelBuilder);
 
-        // modelBuilder.Entity<Order>().HasData(SeedData.GetOrders());
-        // modelBuilder.Entity<MenuItem>().HasData(SeedData.GetMenuItems());
+        SeedData.Seed(modelBuilder);
     }
 
     private static void ConfigureOrderEntity(ModelBuilder modelBuilder)
