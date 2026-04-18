@@ -3,6 +3,7 @@ using System;
 using GoodHamburger.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GoodHamburger.Infrastructure.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260418053043_AddSeedData")]
+    partial class AddSeedData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -71,58 +74,6 @@ namespace GoodHamburger.Infrastructure.Migrations
                         .HasDatabaseName("IX_MenuItems_Category_DisplayOrder");
 
                     b.ToTable("MenuItems");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "xburger",
-                            Category = "Sandwich",
-                            Description = "Hambúrguer 150g com queijo derretido",
-                            DisplayOrder = 1,
-                            IsActive = true,
-                            Name = "X Burger",
-                            Price = 5.00m
-                        },
-                        new
-                        {
-                            Id = "xegg",
-                            Category = "Sandwich",
-                            Description = "Hambúrguer com ovo frito e queijo",
-                            DisplayOrder = 2,
-                            IsActive = true,
-                            Name = "X Egg",
-                            Price = 4.50m
-                        },
-                        new
-                        {
-                            Id = "xbacon",
-                            Category = "Sandwich",
-                            Description = "Hambúrguer com bacon crocante e queijo",
-                            DisplayOrder = 3,
-                            IsActive = true,
-                            Name = "X Bacon",
-                            Price = 7.00m
-                        },
-                        new
-                        {
-                            Id = "fries",
-                            Category = "SideDish",
-                            Description = "Batata frita crocante (150g)",
-                            DisplayOrder = 1,
-                            IsActive = true,
-                            Name = "Batata Frita",
-                            Price = 2.00m
-                        },
-                        new
-                        {
-                            Id = "soda",
-                            Category = "Drink",
-                            Description = "Lata 350ml",
-                            DisplayOrder = 1,
-                            IsActive = true,
-                            Name = "Refrigerante",
-                            Price = 2.50m
-                        });
                 });
 
             modelBuilder.Entity("GoodHamburger.Core.Entities.Order", b =>
@@ -182,52 +133,6 @@ namespace GoodHamburger.Infrastructure.Migrations
                         .HasDatabaseName("IX_Orders_CreatedAt_Sandwich");
 
                     b.ToTable("Orders");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            AppliedDiscount = "Combo",
-                            CreatedAt = new DateTime(2026, 4, 13, 5, 43, 48, 155, DateTimeKind.Utc).AddTicks(5095),
-                            Discount = 1.90m,
-                            Drink = "Soda",
-                            Sandwich = "XBurger",
-                            SideDish = "Fries",
-                            Subtotal = 9.50m,
-                            Total = 7.60m
-                        },
-                        new
-                        {
-                            Id = new Guid("22222222-2222-2222-2222-222222222222"),
-                            AppliedDiscount = "SandwichDrink",
-                            CreatedAt = new DateTime(2026, 4, 15, 5, 43, 48, 155, DateTimeKind.Utc).AddTicks(5105),
-                            Discount = 1.425m,
-                            Drink = "Soda",
-                            Sandwich = "XBacon",
-                            Subtotal = 9.50m,
-                            Total = 8.075m
-                        },
-                        new
-                        {
-                            Id = new Guid("33333333-3333-3333-3333-333333333333"),
-                            AppliedDiscount = "SandwichSide",
-                            CreatedAt = new DateTime(2026, 4, 16, 5, 43, 48, 155, DateTimeKind.Utc).AddTicks(5108),
-                            Discount = 0.65m,
-                            Sandwich = "XEgg",
-                            SideDish = "Fries",
-                            Subtotal = 6.50m,
-                            Total = 5.85m
-                        },
-                        new
-                        {
-                            Id = new Guid("44444444-4444-4444-4444-444444444444"),
-                            AppliedDiscount = "None",
-                            CreatedAt = new DateTime(2026, 4, 17, 5, 43, 48, 155, DateTimeKind.Utc).AddTicks(5110),
-                            Discount = 0m,
-                            Sandwich = "XBurger",
-                            Subtotal = 5.00m,
-                            Total = 5.00m
-                        });
                 });
 #pragma warning restore 612, 618
         }
