@@ -5,9 +5,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorPages();
 builder.Services.AddServerSideBlazor();
 
-builder.Services.AddScoped(sp => new HttpClient 
-{ 
-    BaseAddress = new Uri("http://localhost:5156")
+var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? "https://localhost:7132";
+
+builder.Services.AddScoped(sp => new HttpClient
+{
+    BaseAddress = new Uri(apiBaseUrl)
 });
 
 var app = builder.Build();
