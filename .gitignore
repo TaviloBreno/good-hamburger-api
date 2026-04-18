@@ -72,3 +72,9 @@ $RECYCLE.BIN/
 ## --------------------------------------------------------------------------
 appsettings.Development.json
 # .env (se você usar variáveis de ambiente)
+
+# App Settings
+appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.*.json

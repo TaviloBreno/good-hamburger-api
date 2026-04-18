@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: goodhamburger_db
+    environment:
+      POSTGRES_DB: goodhamburger
+      POSTGRES_USER: hamburger_admin
+      POSTGRES_PASSWORD: Good@Hamburger2024!
+      POSTGRES_ROOT_PASSWORD: Good@Hamburger2024!
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - goodhamburger_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hamburger_admin -d goodhamburger"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: goodhamburger_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@goodhamburger.com
+      PGADMIN_DEFAULT_PASSWORD: admin123
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - goodhamburger_network
+
+volumes:
+  postgres_data:
+
+networks:
+  goodhamburger_network:
+    driver: bridge
