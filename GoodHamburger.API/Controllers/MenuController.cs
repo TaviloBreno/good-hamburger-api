@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using GoodHamburger.Core.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GoodHamburger.API.Controllers
 {
@@ -7,50 +8,87 @@ namespace GoodHamburger.API.Controllers
     [Produces("application/json")]
     public class MenuController : ControllerBase
     {
-        [HttpGet]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        public IActionResult GetMenu()
+        private readonly IMenuService _menuService;
+        private readonly ILogger<MenuController> _logger;
+
+        public MenuController(IMenuService menuService, ILogger<MenuController> logger)
         {
-            var menu = new
+            _menuService = menuService;
+            _logger = logger;
+        }
+
+        [HttpGet]
+        [ProducesResponseType(typeof(MenuResponse), StatusCodes.Status200OK)]
+        public async Task<IActionResult> GetMenu()
+        {
+            var sandwiches = await _menuService.GetSandwichesAsync();
+            var sideDishes = await _menuService.GetSideDishesAsync();
+            var drinks = await _menuService.GetDrinksAsync();
+            var discountRules = await _menuService.GetDiscountRulesAsync();
+
+            var menu = new MenuResponse
             {
-                Sandwiches = new[]
+                Sandwiches = sandwiches.Select(s => new MenuItemDto
                 {
-                new { Id = "xburger", Name = "X Burger", Price = 5.00m, Description = "Hambúrguer com queijo" },
-                new { Id = "xegg", Name = "X Egg", Price = 4.50m, Description = "Hambúrguer com ovo e queijo" },
-                new { Id = "xbacon", Name = "X Bacon", Price = 7.00m, Description = "Hambúrguer com bacon e queijo" }
-            },
-                SideDishes = new[]
+                    Id = s.Id,
+                    Name = s.Name,
+                    Price = s.Price,
+                    Description = s.Description
+                }),
+                SideDishes = sideDishes.Select(s => new MenuItemDto
                 {
-                new { Id = "fries", Name = "Batata Frita", Price = 2.00m, Description = "Batata frita crocante" }
-            },
-                Drinks = new[]
+                    Id = s.Id,
+                    Name = s.Name,
+                    Price = s.Price,
+                    Description = s.Description
+                }),
+                Drinks = drinks.Select(d => new MenuItemDto
                 {
-                new { Id = "soda", Name = "Refrigerante", Price = 2.50m, Description = "Lata 350ml" }
-            },
-                DiscountRules = new[]
-                {
-                new {
-                    Name = "Combo Good",
-                    Description = "Sanduíche + Batata + Refrigerante",
-                    Discount = "20%",
-                    Condition = "Quando pedir os três itens juntos"
-                },
-                new {
-                    Name = "Promoção Drink",
-                    Description = "Sanduíche + Refrigerante",
-                    Discount = "15%",
-                    Condition = "Quando pedir sanduíche com refrigerante"
-                },
-                new {
-                    Name = "Promoção Side",
-                    Description = "Sanduíche + Batata",
-                    Discount = "10%",
-                    Condition = "Quando pedir sanduíche com batata"
-                }
-            }
+                    Id = d.Id,
+                    Name = d.Name,
+                    Price = d.Price,
+                    Description = d.Description
+                }),
+                DiscountRules = discountRules
             };
 
+            _logger.LogInformation("Menu retrieved successfully");
             return Ok(menu);
         }
+
+        [HttpGet("{id}")]
+        [ProducesResponseType(typeof(MenuItemDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> GetMenuItem(string id)
+        {
+            var item = await _menuService.GetMenuItemByIdAsync(id);
+
+            if (item == null)
+                return NotFound(new { message = $"Menu item with ID '{id}' not found" });
+
+            return Ok(new MenuItemDto
+            {
+                Id = item.Id,
+                Name = item.Name,
+                Price = item.Price,
+                Description = item.Description
+            });
+        }
+    }
+
+    public class MenuResponse
+    {
+        public IEnumerable<MenuItemDto> Sandwiches { get; set; } = new List<MenuItemDto>();
+        public IEnumerable<MenuItemDto> SideDishes { get; set; } = new List<MenuItemDto>();
+        public IEnumerable<MenuItemDto> Drinks { get; set; } = new List<MenuItemDto>();
+        public IEnumerable<DiscountRule> DiscountRules { get; set; } = new List<DiscountRule>();
+    }
+
+    public class MenuItemDto
+    {
+        public string Id { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public decimal Price { get; set; }
     }
 }
